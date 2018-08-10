@@ -27,12 +27,12 @@ TRACE = False
 #show processing time or debugging info
 SHOW_PROCESSING_TIME = False
 SHOW_DEBUGGING_INFO = False
-CREATE_DATASET = True
+CREATE_DATASET = False
 if CREATE_DATASET:
     create_image_index = 290
 
 #set whether simulator is being used or not
-simulator_or_not = False
+simulator_or_not = True
 VIDEO_RECORD = False
 
 IMAGE_WIDTH = 800
