@@ -33,13 +33,14 @@ if CREATE_DATASET:
 
 #set whether simulator is being used or not
 simulator_or_not = True
+IMAGE_SKIP_COUNT = 2 #every third /image_color will be processed for detection/classification
 VIDEO_RECORD = False
 
 IMAGE_WIDTH = 800
 IMAGE_HEIGHT = 600
 
 #uncomment the following if the video comes from rosbag file
-if simulator_or_not == False:
+if simulator_or_not == False: 
     IMAGE_WIDTH = 1368
     IMAGE_HEIGHT = 1096
 if VIDEO_RECORD:
@@ -128,6 +129,8 @@ class TLDetector(object):
             a_light.pose.pose.position.y = sl_pos[1]
             a_light.pose.pose.position.z = 0
             self.stop_lines.append(a_light)
+
+        self.img_count = 0
 
         rospy.spin()
 
@@ -419,38 +422,43 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
-        self.has_image = True
-        self.camera_image = msg
-        light_wp, state = self.process_traffic_lights()
+        if(self.img_count == IMAGE_SKIP_COUNT): #IMAGE_SKIP_COUNT = 2 means skipping 2 frames. (processing only every third frame)
+            self.img_count = 0 #reset image skip count
+            self.has_image = True
+            self.camera_image = msg
+            light_wp, state = self.process_traffic_lights()
 
-        #print("Received an image!")
+            #print("Received an image!")
 
-        '''
-        Publish upcoming red lights at camera frequency.
-        Each predicted state has to occur `STATE_COUNT_THRESHOLD` number
-        of times till we start using it. Otherwise the previous stable state is
-        used.
-        '''
+            '''
+            Publish upcoming red lights at camera frequency.
+            Each predicted state has to occur `STATE_COUNT_THRESHOLD` number
+            of times till we start using it. Otherwise the previous stable state is
+            used.
+            '''
 
-
-        if self.state != state:
-            self.state_count = 0
-            self.state = state
-        elif self.state_count >= STATE_COUNT_THRESHOLD:
-            self.last_state = self.state
-            # if 3 consequent consistent light types are detected, finally classify the traffic light as something definitely
-            if(self.state == TrafficLight.UNKNOWN):
-                self.tl_filtered_state = "UNKNOWN"
-            elif(self.state == TrafficLight.RED):
-                self.tl_filtered_state = "RED"
+            if self.state != state:
+                self.state_count = 0
+                self.state = state
+            elif self.state_count >= STATE_COUNT_THRESHOLD:
+                self.last_state = self.state
+                # if 3 consequent consistent light types are detected, finally classify the traffic light as something definitely
+                if(self.state == TrafficLight.UNKNOWN):
+                    self.tl_filtered_state = "UNKNOWN"
+                elif(self.state == TrafficLight.RED):
+                    self.tl_filtered_state = "RED"
+                else:
+                    self.tl_filtered_state = "YELOW/GREEN"
+                light_wp = light_wp if state == TrafficLight.RED else -1
+                self.last_wp = light_wp
+                self.upcoming_red_light_pub.publish(Int32(light_wp))
             else:
-                self.tl_filtered_state = "YELOW/GREEN"
-            light_wp = light_wp if state == TrafficLight.RED else -1
-            self.last_wp = light_wp
-            self.upcoming_red_light_pub.publish(Int32(light_wp))
+                self.upcoming_red_light_pub.publish(Int32(self.last_wp))
+            self.state_count += 1
+
         else:
-            self.upcoming_red_light_pub.publish(Int32(self.last_wp))
-        self.state_count += 1
+            self.img_count = self.img_count + 1 #increment skip count
+
 
     def get_closest_waypoint(self, pose, all_waypoints):
         """Identifies the closest path waypoint to the given position
