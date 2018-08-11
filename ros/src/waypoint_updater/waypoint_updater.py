@@ -39,7 +39,7 @@ class WaypointUpdater(object):
         self.stopline_wp_idx = -1
 
         # Get parameters
-        self.lookahead_waypoints = rospy.get_param('~lookahead_waypoints', 200)
+        self.lookahead_waypoints = rospy.get_param('~lookahead_waypoints', 20)
         self.max_deceleration = rospy.get_param('~max_deceleration', 0.5)
 
 
