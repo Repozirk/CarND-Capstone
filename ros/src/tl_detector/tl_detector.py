@@ -54,7 +54,7 @@ class TLDetector(object):
         rospy.init_node('tl_detector')
 
         # What model to download.
-        MODEL_NAME = '/capstone/models/research/object_detection/ssd_mobilenet_v1_coco_2017_11_17'
+        MODEL_NAME = './ssd_mobilenet_v1_coco_2017_11_17'
         # Path to frozen detection graph. This is the actual model that is used for the object detection.
         PATH_TO_FROZEN_GRAPH = MODEL_NAME + '/frozen_inference_graph.pb'
         # tf.__version__
