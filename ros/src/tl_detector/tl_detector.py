@@ -19,8 +19,6 @@ import os
 from time import sleep
 from scipy.spatial import KDTree
 
-#TODO: only run tl detection when there's an up coming traffic light - based on map data, in order to save processing time.
-
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 SHOW_TRAFFIC_LIGHT_GT = False
 
@@ -498,10 +496,6 @@ class TLDetector(object):
         cv2_img = self.bridge.imgmsg_to_cv2(self.camera_image,"bgr8")
         #print(cv2_img.shape)
 
-
-        #write images to video
-        #print(cv2_img)
-        #perform detection
         if SHOW_PROCESSING_TIME:
             start_time = timeit.default_timer()
 
@@ -541,7 +535,7 @@ class TLDetector(object):
 
         # List of positions that correspond to the line to stop in front of for a given intersection
 
-        closest_light = None
+        near_light = False
         line_wp_idx = -1
 
         #if pose exists, go and find the closest light's index
@@ -557,14 +551,18 @@ class TLDetector(object):
 
                 d = temp_wp_idx - car_wp_idx
 
+                #print("car_wp_idx: {}, temp_wp_idx: {}".format(car_wp_idx, temp_wp_idx))
+
                 if d >= 0 and d < diff:
                     diff = d
-                    closest_light = light
+                    #check if light near is detected
+                    if((temp_wp_idx - car_wp_idx) < 200): #200 is chosen by running simulator and observing feasible distance to traffic lights
+                        near_light = True
                     line_wp_idx = temp_wp_idx
                     #print("waypoint idx: {}".format(line_wp_idx))
 
         # if there exists a light coming up, then get the light state
-        if closest_light:
+        if near_light:
             if USE_SIMULATOR_TL_STATE:
                 # self.lights is an array, array of all the traffic lights (static locations). The state can be accessed as below
                 # grab simulator traffic light status output (grab the 1st traffic light: self.lights[0])
@@ -572,14 +570,14 @@ class TLDetector(object):
                 light = sim_tl_state
             else:
                 # this call is where it calls the NN detection/classification
-                state = self.get_light_state(closest_light)
+                state = self.get_light_state(line_wp_idx) #send the idx location of the traffic light location - but not used by the function, just put there for future usage if needed
                 if state != TrafficLight.UNKNOWN:
                     light = state
 
             if SHOW_TRAFFIC_LIGHT_GT and (USE_SIMULATOR_TL_STATE == False):
                 print("NN result: {}, simulator result: {}".format(state, sim_tl_state))
 
-            print("filtered result: {}, USING SIMULATOR? {}".format(self.tl_filtered_state, USE_SIMULATOR_TL_STATE))
+            print("filtered result: {}, USING SIMULATOR Trafficlight status? {}".format(self.tl_filtered_state, USE_SIMULATOR_TL_STATE))
             print("------------------------------------------")
             return line_wp_idx, light  # if it isn't unknown light status
         # if there's no close traffic light, then return light status as UNKNOWN(default) and idx = -1
