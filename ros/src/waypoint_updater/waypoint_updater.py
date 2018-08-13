@@ -39,8 +39,8 @@ class WaypointUpdater(object):
         self.stopline_wp_idx = -1
 
         # Get parameters
-        self.lookahead_waypoints = rospy.get_param('~lookahead_waypoints', 20)
-        self.max_deceleration = rospy.get_param('~max_deceleration', 0.5)
+        self.lookahead_waypoints = rospy.get_param('~lookahead_waypoints', 30)
+        self.max_deceleration = rospy.get_param('~max_deceleration', 0.75)
 
 
         # Register message listeners
@@ -57,7 +57,7 @@ class WaypointUpdater(object):
         """
         Runs the operations of this waypoint updater
         """
-        rate = rospy.Rate(50)
+        rate = rospy.Rate(10)
         while not rospy.is_shutdown():
             if self.pose and self.waypoints_base and self.waypoints_tree:
                 # get closest waypoint
@@ -121,11 +121,11 @@ class WaypointUpdater(object):
             p.pose = wp.pose # do we need this?!
 
             # to stop the vehicle behind the stopline, reduce by 3 (distance from vehicles center to nose)
-            stop_idx = max(self.stopline_wp_idx - closest_idx - 2, 0)
+            stop_idx = max(self.stopline_wp_idx - closest_idx - 3, 0)
 
             dist = self.distance(waypoints, i, stop_idx)
-            vel = math.sqrt(2 * self.max_deceleration * dist)
-            if vel < 1:
+            vel = (self.max_deceleration * dist)
+            if vel < 0:
                 vel = 0
 
             # only consider velocity values smaller than target speed
