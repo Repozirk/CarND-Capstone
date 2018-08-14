@@ -125,7 +125,7 @@ class WaypointUpdater(object):
 
             dist = self.distance(waypoints, i, stop_idx)
             vel = (self.max_deceleration * dist)
-            if vel < 0:
+            if vel < 1:
                 vel = 0
 
             # only consider velocity values smaller than target speed
