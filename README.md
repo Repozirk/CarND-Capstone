@@ -24,7 +24,7 @@ Please use **one** of the two installation options, either native **or** docker 
 
 Build the docker container
 ```bash
-docker build . -t capstone
+docker build --no-cache . -t capstone
 ```
 
 Run the docker file
