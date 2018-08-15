@@ -24,7 +24,7 @@ class Controller(object):
         self.throttle_controller = PID(kp, ki, kd, mn, mx)
 
         # create low pass filter
-        tau = 0.5  # 1/(2pi*tau) = cuttoff frequency
+        tau = 0.02  # 1/(2pi*tau) = cuttoff frequency
         ts = 0.02  # sample time
         self.vel_lpf = LowPassFilter(tau, ts)
 
