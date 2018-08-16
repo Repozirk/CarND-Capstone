@@ -340,7 +340,6 @@ class TLDetector(object):
                     seg_bottom = (l[2 * int(tl_img_height / 3):3 * int(tl_img_height / 3), :] > L_THRES).sum()
                     
                     # check if top segment is greater than the bottom segment, otherwise it's not red light
-                    global self.SIMULATOR_OR_NOT
                     
                     if ((seg_top > seg_bottom) and (seg_top > seg_middle)) or (self.SIMULATOR_OR_NOT == True):
                         # now the top segment is the highest, but by chance this could mean that some very bright object or the sun could be shining on the top part of the traffic light
