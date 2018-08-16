@@ -34,7 +34,7 @@ if CREATE_DATASET:
     create_image_index = 290
 
 #set whether simulator is being used or not
-SIMULATOR_OR_NOT = True
+#SIMULATOR_OR_NOT = True
 IMAGE_SKIP_COUNT = 2 #every third /image_color will be processed for detection/classification
 VIDEO_RECORD = False
 
@@ -42,9 +42,6 @@ IMAGE_WIDTH = 800
 IMAGE_HEIGHT = 600
 
 #uncomment the following if the video comes from rosbag file
-if SIMULATOR_OR_NOT == False: 
-    IMAGE_WIDTH = 1368
-    IMAGE_HEIGHT = 1096
 if VIDEO_RECORD:
     VID_RECORD_FRAMERATE = 4.0 #processing speed is roughly 10Hz
     fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
@@ -54,6 +51,12 @@ class TLDetector(object):
     def __init__(self):
     #def __init__(self):
         rospy.init_node('tl_detector')
+
+        self.SIMULATOR_OR_NOT = bool(rospy.get_param("~SIMULATOR_OR_NOT", True))
+
+        if self.SIMULATOR_OR_NOT == False: 
+            IMAGE_WIDTH = 1368
+            IMAGE_HEIGHT = 1096
 
         # What model to download.
         MODEL_NAME = './ssd_mobilenet_v1_coco_2017_11_17'
@@ -102,7 +105,7 @@ class TLDetector(object):
         '''
         sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
 
-        if (SIMULATOR_OR_NOT == True):
+        if (self.SIMULATOR_OR_NOT == True):
             sub6 = rospy.Subscriber('/image_color', Image, self.image_cb)
         else:
             sub6 = rospy.Subscriber('/image_raw', Image, self.image_cb)
@@ -335,10 +338,10 @@ class TLDetector(object):
                     seg_top = (l[0:1 * int(tl_img_height / 3), :] > L_THRES).sum()
                     seg_middle = (l[1 * int(tl_img_height / 3):2 * int(tl_img_height / 3), :] > L_THRES).sum()
                     seg_bottom = (l[2 * int(tl_img_height / 3):3 * int(tl_img_height / 3), :] > L_THRES).sum()
+                    
                     # check if top segment is greater than the bottom segment, otherwise it's not red light
-                    global SIMULATOR_OR_NOT
-
-                    if ((seg_top > seg_bottom) and (seg_top > seg_middle)) or (SIMULATOR_OR_NOT == True):
+                    
+                    if ((seg_top > seg_bottom) and (seg_top > seg_middle)) or (self.SIMULATOR_OR_NOT == True):
                         # now the top segment is the highest, but by chance this could mean that some very bright object or the sun could be shining on the top part of the traffic light
                         # in order to check that it really is red light, check for R channel content's magnitude.
                         if ((r[0:1 * int(tl_img_height / 3), :] > RED_THRESHOLD).sum() > COUNT_THRESHOLD):
@@ -352,7 +355,7 @@ class TLDetector(object):
                             #if R content in all 3 segments are low then it must be the black back side of traffic lights
                             #now this would only be for simulation mode.. for real case, the L factor should determine it.. well if all these tests fail, then it will be UNKNOWN anyway so good
 
-                            if SIMULATOR_OR_NOT == False:
+                            if self.SIMULATOR_OR_NOT == False:
                                 #if not simulator, this means it's unknown, could be bright light or anything
                                 if VIDEO_RECORD:
                                     cv2.putText(proc_image, "UNKNOWN  TL: " + self.tl_filtered_state, coord, font,
