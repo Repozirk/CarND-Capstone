@@ -1,6 +1,13 @@
-This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
+This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree for the Udacity-RoadRunner team: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
 
 Please use **one** of the two installation options, either native **or** docker installation.
+
+### Team Members
+The following member contributed to this project
+- Brian Lee (Team Lead) - hanbrianlee@gmail.com
+- Christopher Scherer - christopher_scherer@gmx.de
+- Mugdim Bublin - dino_telco@yahoo.de
+- Laurens Hobert - l.hobert@gmail.com
 
 ### Native Installation
 
@@ -24,12 +31,19 @@ Please use **one** of the two installation options, either native **or** docker 
 
 Build the docker container
 ```bash
-docker build . -t capstone
+docker build --no-cache . -t capstone
 ```
 
-Run the docker file
+Run the docker image
 ```bash
-docker run -p 4567:4567 -v $PWD:/capstone -v /tmp/log:/root/.ros/ --rm -it capstone
+chmod +x ./run_docker.sh
+./run_docker.sh
+```
+
+Attach with another console to the docker container
+```bash
+chmod +x ./attach_docker.sh
+./attach_docker.sh
 ```
 
 ### Port Forwarding
@@ -49,10 +63,7 @@ pip install -r requirements.txt
 ```
 3. Make and run styx
 ```bash
-cd ros
-catkin_make
-source devel/setup.sh
-roslaunch launch/styx.launch
+./run.sh
 ```
 4. Run the simulator
 
@@ -68,7 +79,7 @@ rosbag play -l traffic_light_bag_file/traffic_light_training.bag
 ```
 4. Launch your project in site mode
 ```bash
-cd CarND-Capstone/ros
-roslaunch launch/site.launch
+cd CarND-Capstone/
+./run.sh
 ```
 5. Confirm that traffic light detection works on real life images
