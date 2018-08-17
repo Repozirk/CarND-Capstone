@@ -62,9 +62,18 @@ cd CarND-Capstone
 pip install -r requirements.txt
 ```
 3. Make and run styx
+either do:
 ```bash
 ./run.sh
 ```
+or:
+```bash
+cd ros
+catkin_make
+source devel/setup.sh
+roslaunch launch/styx.launch
+```
+
 4. Run the simulator
 
 ### Real world testing
@@ -79,7 +88,9 @@ rosbag play -l traffic_light_bag_file/traffic_light_training.bag
 ```
 4. Launch your project in site mode
 ```bash
-cd CarND-Capstone/
-./run.sh
+cd CarND-Capstone/ros
+catkin_make
+source devel/setup.sh
+roslaunch launch/site.launch
 ```
 5. Confirm that traffic light detection works on real life images
